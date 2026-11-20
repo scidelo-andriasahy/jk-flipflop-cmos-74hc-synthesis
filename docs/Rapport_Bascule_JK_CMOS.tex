@@ -1,0 +1,292 @@
+\documentclass[12pt, a4paper]{article}
+
+% --- 1. GÉOMÉTRIE ET ENCODAGE ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage[top=2.5cm, bottom=2.5cm, left=2.5cm, right=2.5cm]{geometry}
+
+% --- 2. POLICES (STYLE WORD/TIMES) ---
+\usepackage{mathptmx} % Times New Roman pour texte et maths
+\usepackage[scaled=.90]{helvet} % Helvetica pour sans-serif
+
+% --- 3. MATHÉMATIQUES ---
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% --- 4. COULEURS ET TABLEAUX ---
+% L'option [table] charge automatiquement colortbl et évite les conflits
+\usepackage[table,svgnames]{xcolor} 
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+
+% --- 5. GRAPHIQUES ET DESSINS ---
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{tikz}
+% Chargement de toutes les bibliothèques nécessaires
+\usetikzlibrary{automata, positioning, arrows, shapes.geometric, shadows, calc, matrix}
+
+% --- CORRECTIF FRANÇAIS/TIKZ ---
+% Désactive les caractères actifs du français dans les figures TikZ pour éviter les bugs
+\tikzset{every picture/.prefix style={execute at begin picture=\shorthandoff{:;!?}}}
+
+% --- 6. PERSONNALISATION ---
+% Couleurs ENSA
+\definecolor{EnsaBlue}{RGB}{0, 51, 102}
+\definecolor{EnsaTeal}{RGB}{0, 128, 128}
+\definecolor{HighlightRed}{RGB}{178, 34, 34}
+
+% Style des titres
+\titleformat{\section}
+{\color{EnsaBlue}\normalfont\Large\bfseries}
+{\thesection}{1em}{}[\hrule]
+
+\titleformat{\subsection}
+{\color{EnsaTeal}\normalfont\large\bfseries}
+{\thesubsection}{1em}{}
+
+% Commande mot-clé
+\newcommand{\motcle}[1]{\textcolor{HighlightRed}{\textbf{#1}}}
+
+\begin{document}
+
+% ==========================================
+% PAGE DE GARDE
+% ==========================================
+\begin{titlepage}
+    % --- En-tête avec Logos ---
+    \begin{minipage}{0.3\textwidth}
+        \begin{flushleft}
+            % Utilisation de tes noms de fichiers réels
+            \IfFileExists{logoEnsa.jpg}{
+                \includegraphics[height=2.5cm]{logoEnsa.jpg}
+            }{
+                % Fallback si l'image n'est pas trouvée
+                \begin{tikzpicture}
+                    \draw[thick, EnsaBlue, fill=gray!5] (0,0) rectangle (3,2.5);
+                    \node[align=center, text width=2.5cm, EnsaBlue] at (1.5,1.25) {\textbf{LOGO 1}\\\scriptsize(image\_e32fe4.png)};
+                \end{tikzpicture}
+            }
+        \end{flushleft}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \begin{flushright}
+             \IfFileExists{logoAdelmalek.png}{
+                \includegraphics[height=2.5cm]{logoAdelmalek.png}
+            }{
+                 \begin{tikzpicture}
+                    \draw[thick, EnsaTeal, fill=gray!5] (0,0) rectangle (3,2.5);
+                    \node[align=center, text width=2.5cm, EnsaTeal] at (1.5,1.25) {\textbf{LOGO 2}\\\scriptsize(image\_e3891f.png)};
+                \end{tikzpicture}
+            }
+        \end{flushright}
+    \end{minipage}
+
+    \centering
+    \vspace*{1.5cm}
+
+    {\Large \textbf{École Nationale des Sciences Appliquées de Tanger}}\\[0.5cm]
+    {\large GSEA2 -- Conception de Systèmes Électroniques}\\[2cm]
+
+    \rule{\linewidth}{0.5mm} \\[0.4cm]
+    { \huge \bfseries \color{EnsaBlue} RAPPORT DE PROJET \\[0.4cm] \Large Conception Complète d'une Bascule JK } \\[0.4cm]
+    \rule{\linewidth}{0.5mm} \\[3cm]
+
+    \textbf{Réalisé par :}\\
+    \textsc{ANDRIASAHY} Tsikomia Scidelo\\[0.5cm]
+
+    \textbf{Encadré par :}\\
+    Pr. El Mourabit Aimad\\[3cm]
+
+    \vfill
+    {\large Année Universitaire 2025/2026}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ==========================================
+% CONTENU DU RAPPORT
+% ==========================================
+
+\section{Introduction}
+Ce projet a pour objectif la modélisation, la synthèse et la simulation d'une bascule JK synchrone. L'approche choisie repose sur une modélisation par machine d'états (FSM de Moore) et une synthèse structurelle utilisant une bascule D et des portes logiques standard de la famille 74HC.
+
+\section{Modélisation Système}
+
+\subsection{Schéma Bloc (Boîte Noire)}
+La bascule JK est un circuit séquentiel à deux entrées de commande ($J, K$), une entrée d'horloge ($H$) et deux sorties complémentaires ($Q, \overline{Q}$).
+
+\begin{figure}[H]
+\centering
+    \begin{tikzpicture}[node distance=2cm, auto, thick]
+        % Boîte principale avec ombre portée (nécessite library shadows)
+        \draw[fill=blue!5, drop shadow] (0,0) rectangle (6,4);
+        \node at (3,3.5) {\textbf{\Large Bascule JK}};
+        \node at (3,0.5) {\textit{Modèle Comportemental}};
+        
+        % Entrées
+        \draw[ultra thick] (-1,3) -- (0,3) node[anchor=east] at (-1,3) {\Large $J$};
+        \draw[ultra thick] (-1,1) -- (0,1) node[anchor=east] at (-1,1) {\Large $K$};
+        \draw[ultra thick] (-1,2) -- (0,2) node[anchor=east] at (-1,2) {\Large $H$};
+        % Triangle Horloge
+        \draw (0,1.8) -- (0.4,2) -- (0,2.2);
+        
+        % Sorties
+        \draw[ultra thick] (6,3) -- (7,3) node[anchor=west] at (7,3) {\Large $Q$};
+        \draw[ultra thick] (6,1) -- (7,1) node[anchor=west] at (7,1) {\Large $\overline{Q}$};
+        
+        % Décoration interne
+        \draw[dashed, gray] (1.5, 0.2) -- (1.5, 3.8);
+        \draw[dashed, gray] (4.5, 0.2) -- (4.5, 3.8);
+    \end{tikzpicture}
+\caption{Modèle Boîte Noire de la Bascule JK}
+\end{figure}
+
+\subsection{Table de Vérité Fonctionnelle}
+\begin{table}[H]
+\centering
+\caption{Modes de fonctionnement de la bascule}
+\vspace{0.2cm}
+\begin{tabular}{|c|c|c|c|c|l|}
+\hline
+\rowcolor{EnsaBlue!20} \textbf{H} & \textbf{J} & \textbf{K} & \textbf{Q$_{n+1}$} & \textbf{$\overline{\textbf{Q}}_{n+1}$} & \textbf{Description / Mode} \\ \hline
+$\uparrow$ & 0 & 0 & Q$_n$ & $\overline{Q}_n$ & \motcle{Maintien}, Mémoire, Pas de changement \\ \hline
+$\uparrow$ & 0 & 1 & 0 & 1 & \motcle{Reset}, RAZ, Mise à 0, Effacement \\ \hline
+$\uparrow$ & 1 & 0 & 1 & 0 & \motcle{Set}, Mise à 1, Écriture, Chargement \\ \hline
+$\uparrow$ & 1 & 1 & $\overline{Q}_n$ & Q$_n$ & \motcle{Toggle}, Basculement, Commutation \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Machine à États Finis (FSM Moore)}
+Le système possède deux états stables : $Q=0$ et $Q=1$. Le passage d'un état à l'autre dépend des entrées $J$ et $K$ au front d'horloge.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[shorten >=1pt,node distance=5cm,on grid,auto] 
+   \node[state, initial] (q_0)   {$Q=0$}; 
+   \node[state] (q_1) [right=of q_0] {$Q=1$}; 
+    \path[->] 
+    (q_0) edge [loop above] node {J=0 (Maintien)} (q_0)
+          edge [bend left] node {J=1 (Set)} (q_1)
+    (q_1) edge [loop above] node {K=0 (Maintien)} (q_1)
+          edge [bend left] node {K=1 (Reset)} (q_0);
+\end{tikzpicture}
+\caption{Graphe d'état de Moore}
+\end{figure}
+
+\section{Synthèse Logique}
+
+\subsection{Table de Transition pour Synthèse}
+Pour synthétiser le circuit à l'aide d'une bascule D (où $Q_{n+1} = D$), nous devons exprimer l'état futur en fonction de l'état présent et des entrées.
+
+\begin{table}[H]
+\centering
+\caption{Table de transition détaillée (3 variables)}
+\vspace{0.2cm}
+\begin{tabular}{|c|c|c||c|c|}
+\hline
+\rowcolor{EnsaTeal!20} \textbf{J} & \textbf{K} & \textbf{Q$_n$} & \textbf{Q$_{n+1}$ (D)} & \textbf{Action} \\ \hline
+0 & 0 & 0 & 0 & Maintien 0 \\ \hline
+0 & 0 & 1 & 1 & Maintien 1 \\ \hline
+0 & 1 & 0 & 0 & Maintien 0 \\ \hline
+0 & 1 & 1 & 0 & Reset \\ \hline
+1 & 0 & 0 & 1 & Set \\ \hline
+1 & 0 & 1 & 1 & Maintien 1 \\ \hline
+1 & 1 & 0 & 1 & Toggle (0$\to$1) \\ \hline
+1 & 1 & 1 & 0 & Toggle (1$\to$0) \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Équation Caractéristique}
+L'analyse de la colonne $Q_{n+1}$ permet d'extraire les mintermes où la sortie est à 1 :
+\begin{itemize}
+    \item $Q_n=0$ et $J=1$ (Indépendant de K) $\rightarrow J \cdot \overline{Q}_n$
+    \item $Q_n=1$ et $K=0$ (Indépendant de J) $\rightarrow \overline{K} \cdot Q_n$
+\end{itemize}
+
+L'équation finale pour l'entrée D est :
+\begin{equation}
+    \boxed{D = J\overline{Q}_n + \overline{K}Q_n}
+\end{equation}
+
+\section{Analyse des Contraintes Électriques}
+Nous utilisons la famille technologique \motcle{74HC} alimentée sous $V_{CC} = 4.5V$.
+
+\subsection{Marges de Bruit}
+Les marges de bruit définissent l'immunité du circuit aux parasites.
+\begin{itemize}
+    \item \textbf{État Haut ($NM_H$) :}
+    $$ V_{OH_{min}} = 3.98V \quad ; \quad V_{IH_{min}} = 3.15V $$
+    $$ NM_H = V_{OH} - V_{IH} = \motcle{0.83 V} $$
+    
+    \item \textbf{État Bas ($NM_L$) :}
+    $$ V_{IL_{max}} = 1.35V \quad ; \quad V_{OL_{max}} = 0.26V $$
+    $$ NM_L = V_{IL} - V_{OL} = \motcle{1.09 V} $$
+\end{itemize}
+\textbf{Conclusion :} Le circuit possède une excellente immunité au bruit (> 0.8V).
+
+\subsection{Fréquence Maximale de Fonctionnement ($F_{max}$)}
+La vitesse est limitée par le chemin critique : Bascule (Sortie Q) $\rightarrow$ Logique Combinatoire $\rightarrow$ Bascule (Entrée D).
+
+\begin{itemize}
+    \item Temps de propagation Bascule ($T_{co}$) : 44 ns (Max)
+    \item Temps Logique Combinatoire ($T_{logique} = T_{AND} + T_{OR}$) : $18 + 18 = 36$ ns
+    \item Temps de Setup ($T_{su}$) : 15 ns
+\end{itemize}
+
+$$ T_{min} = T_{co} + T_{logique} + T_{su} = 44 + 36 + 15 = 95 \text{ ns} $$
+$$ F_{max} = \frac{1}{T_{min}} \approx \motcle{10.5 \text{ MHz}} $$
+
+\subsection{Consommation de Puissance}
+En technologie CMOS, la puissance statique est négligeable. La puissance dynamique domine à haute fréquence.
+\begin{itemize}
+    \item \textbf{Formule :} $P_{dyn} = C_{PD_{Total}} \times V_{CC}^2 \times F$
+    \item \textbf{Application Numérique :} 
+    Avec $C_{total} \approx 64 pF$, $V_{CC}=5V$ et $F=10 MHz$ :
+    $$ P_{dyn} = 64 \cdot 10^{-12} \times 25 \times 10^7 = \motcle{16 mW} $$
+\end{itemize}
+
+\section{Simulation et Validation}
+
+\subsection{Simulation Logique (Modèle Idéal)}
+Validation de l'équation $D = J\overline{Q} + \overline{K}Q$ avec des portes génériques.
+
+\begin{figure}[H]
+\centering
+    \IfFileExists{simulation2.png}{
+        \includegraphics[width=\textwidth]{simulation2.png}
+    }{
+        % Cadre vide si l'image n'est pas trouvée
+        \begin{tikzpicture}
+            \draw[dashed, thick, gray] (0,0) rectangle (14,7);
+            \node[align=center] at (7,3.5) {\Large \textbf{IMAGE MANQUANTE} \\ \texttt{simulation2.png}};
+        \end{tikzpicture}
+    }
+\caption{Simulation fonctionnelle avec portes idéales}
+\end{figure}
+
+\subsection{Simulation Physique (Composants 74HC)}
+Validation avec les contraintes réelles (délais, seuils) utilisant les composants 74HC74, 74HC08, 74HC32.
+
+\begin{figure}[H]
+\centering
+    \IfFileExists{simulation3reelle.png}{
+        \includegraphics[width=\textwidth]{simulation3reelle.png}
+    }{
+        % Cadre vide si l'image n'est pas trouvée
+        \begin{tikzpicture}
+            \draw[dashed, thick, gray] (0,0) rectangle (14,7);
+            \node[align=center] at (7,3.5) {\Large \textbf{IMAGE MANQUANTE} \\ \texttt{simulation3reelle.png}};
+        \end{tikzpicture}
+    }
+\caption{Simulation temporelle et électrique (74HC)}
+\end{figure}
+
+\section{Conclusion}
+L'étude complète a permis de concevoir une bascule JK fonctionnelle à partir d'une bascule D. L'analyse théorique confirme que le design respecte les contraintes électriques de la famille 74HC. Les simulations valident le comportement logique et temporel, garantissant un fonctionnement fiable jusqu'à 10.5 MHz avec une consommation maîtrisée.
+
+\end{document}
